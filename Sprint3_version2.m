@@ -1,6 +1,6 @@
 %Group 47-4
 %Ivan Krajtmajer - 100508010
-%
+%Lucas González - 100522090
 %
 %
 
@@ -41,8 +41,9 @@ run=1;
 
 nGames=0;
 nPlayers=0;
-vGames=repmat(game_base,1,250); %figure out a way to preallocate without using repmat function 
-players=repmat(player_base,1,50);
+vGames(1,1:250)=struct('playerId', 0, 'nGuesses',0, 'secretCode',[0 0 0 0], 'board', zeros(10,4), 'feedback',zeros(10,2), ...
+    'score',0);
+players(1,1:50)=struct('playerId',0,'name',"name",'surname',"surname",'nGames',0,'score',0);
 id=1;
 nPlayers=0;
 
