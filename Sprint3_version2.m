@@ -91,6 +91,11 @@ while run==1
         case 0
             fprintf("\nThank you for playing the game!")
             run=0;
+            %this lines are for storing the data
+            fileName='games.mat';
+            save(fileName,'vGames'); 
+            fileName='players.mat';
+            save(fileName,'players');
     end
 
 end
