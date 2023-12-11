@@ -8,21 +8,15 @@ clc
 clear
 
 %concerns or bugs notices: (list all bugs when playtesting the game below)
-%
-%
-%
+%-two variables one names Id other id
+%-delete secret code in play function when not testing
 
 %things to do: 
-%-check all other variables match up with the ones in the project file
-%-add option to load in data
-%-check that all headers match up with names given in projec file
+%-
 
 %sprint 4 things:
-%-add playerId input from user before starting game
 %-display list of games from specific player
 %-make sure when a game finishes it updates the players who's id was put in
-%stats
-%-save data into a file when exiting from main
 
 %optional:
 %-write out real code when player runs out of guesses
@@ -31,46 +25,62 @@ clear
 %attempt as valid
 
 player_base=struct('playerId',0,'name',"name",'surname',"surname",'nGames',0,'score',0);
+
 game_base = struct('playerId', 0, 'nGuesses',0, 'secretCode',[0 0 0 0], 'board', zeros(10,4), 'feedback',zeros(10,2), ...
     'score',0);
 
 run=1;
-
 nGames=0;
 nPlayers=0;
-games(1,1:250)=struct('playerId', 0, 'nGuesses',0, 'secretCode',[0 0 0 0], 'board', zeros(10,4), 'feedback',zeros(10,2), ...
-    'score',0);
-players(1,1:50)=struct('playerId',0,'name',"name",'surname',"surname",'nGames',0,'score',0);
-games_of_player(1,1:50,1:250) =struct('playerId', 0, 'nGuesses',0, 'secretCode',[0 0 0 0], 'board', zeros(10,4), 'feedback',zeros(10,2), ...
-    'score',0);
+
+maxPlayers=50;
+players(1,maxPlayers) = struct('playerId',0,...
+                'name','',...
+                'surname','',...
+                'nGames',0, ...
+                'score',0);
+maxGames=250;
+games(1:maxGames) = struct('nGuesses',0,...
+        'secretCode',[0 0 0 0],...
+        'playerId',0,...
+        'board', zeros(10,4),...
+        'feedback',zeros(10,2),...
+        'score',0);
+
+gamesplayer(1:maxGames) = struct('nGuesses',0,...
+        'secretCode',[0 0 0 0],...
+        'playerId',0,...
+        'board', zeros(10,4),...
+        'feedback',zeros(10,2),...
+        'score',0);
+
 id=1;
-nPlayers=0;
 Id=0;
 Id_pass=0;
 counter=1;
 
-maxPlayers=50; %defines the number of max players for easier customizability later on
-
 %loads gama data when testing
-%[games,nGames]=load('gamesInitialization.mat','gamesInit','nGamesInit');
+load('gamesInitialization.mat','gamesInit','nGamesInit')
+nGames=nGamesInit;
+for i=1:nGames
+    games(i)=gamesInit(i);
+end
 
-%loads players when testing 
-%load('playersInitialization.mat','gamesInit','nGamesInit')
-%nPlayer=;
+
+load('playersInitialization.mat','playersInit','nPlayersInit')
+nPlayers=nPlayersInit;
+for i=1:nPlayers
+    players(i)=playersInit(i);
+end
+%% 
 
 while run==1
 
-    
-
-    
     user_input=menu(1); 
     switch user_input
 
         case 1 %Player management
-            %merge into one function that runs in a loop like with games
             %management case 2
-
-            
             
             [players, nPlayers,sortedPlayers] = managePlayers (players,nPlayers,maxPlayers);
                         
@@ -80,38 +90,41 @@ while run==1
                 fprintf("Sorry there are currently no games loaded.\n\n")
             else
                 clc
-                [games,nGames] = manageGames(games,nGames);
+                [games,nGames] = manageGames(games,nGames,players);
             end
 
         case 3 %play game
-            if nGames<=250
+            if nGames<250
                 nGames=nGames+1;
 
-%Conecting players with their ideas---------------
-    % Checking what id is the guy playing
+%Conecting players with their games---------------
+    % Checking the user's id
                 while Id_pass==0
-                    fprintf("Beggin your pardon, you have to identify yourself!\n");
-                    while Id==0
-                        Id=input("Your ID?: ");
-                    end
+                    fprintf("Enter player Id before starting game:\n");
+                    Id=input("Your ID?: ");
+                    
                     for i=1:50
                         if players(1,i).playerId==Id
                             Id_pass=1;
                         end
                     end
+
                     if Id_pass==0
-                        fprintf("There is not such a player in existance! You can:\n");
-                        fprintf("1)Enter another user to play the game\n");
-                        fprintf("2)Cancel\n");
+                        fprintf("The player Id you entered is not valid! You can:\n");
+                        fprintf("1)Manage players\n");
+                        fprintf("2)Go back to the main menu\n");
+                        fprintf("3)Enter another Id\n");
                         option=input("");
+                        
                         switch option
                             case 1
-                        [players, nPlayers,sortedPlayers] = managePlayers (players,nPlayers,maxPlayers);
+                                [players, nPlayers,sortedPlayers] = managePlayers (players,nPlayers,maxPlayers);
                             case 2
                                 Id_pass=2;
+                            case 3
+                                Id_pass=0;
+                                fprintf("\n")
                         end
-                        
-                        Id=0;
                     end
                 end
 
@@ -123,6 +136,7 @@ while run==1
                     players(1,Id).score=players(1,Id).score + games(1,nGames).score;
                 end
                 Id_pass=0;
+            
             else
                 fprintf("Sorry the maximum number of games is already loaded. \n\n")
             end
@@ -130,7 +144,7 @@ while run==1
         case 0
             fprintf("\nThank you for playing the game!")
             run=0;
-            %this lines are for storing the data
+            %these lines are for storing the data
             fileName='games.mat';
             save(fileName,'games'); 
             fileName='players.mat';
@@ -142,32 +156,30 @@ end
 %-------all functions---------
 %menus  
 
-
-function opcion=menu(menu_numr,nGames)
+function option=menu(menu_numr,nGames)
 
     switch menu_numr
         case 1
             
-            opcion=menuMain();
+            option=menuMain();
             % fprintf("1.Player management \n2.Game management \n3.Play game \n0.Exit\n")
         case 2 %when game management called
             
-            opcion = menuGames();
+            option = menuGames();
             % fprintf("1.Remove games \n2.Display games \n0.Exit \n")
         case 3 % when remove games called
             clc
             fprintf("Enter the number of the game (1-%i) you want to remove: ",nGames)
+        
         case 4 %when player management called
-            
-            opcion=menuPlayers();
+            option=menuPlayers();
             % fprintf("1.Enter new player \n2.Display list of players \n3.Display ranking of players \n4.Display top players \n0.Exit\n")
-        case 5 
     end
 
 end
 
 %Menus and options--------------
-function opcion=menuMain()
+function option=menuMain()
     fprintf ('*****************************************\n');
     fprintf ('myMasterMind: \n');
     fprintf ('*****************************************\n');    
@@ -176,11 +188,11 @@ function opcion=menuMain()
     fprintf ('\t 3. Play game\n');
     fprintf ('\t 0. Exit\n');   
     fprintf ('\n');
-    opcion=input ('Enter selection: ');
+    option=input ('Enter selection: ');
     fprintf ('\n');
 end
 
-function opcion = menuGames()
+function option = menuGames()
     
     % to avoid overwriting previous results with menu
     keyPress=input('Press enter to see menu...'); 
@@ -190,15 +202,15 @@ function opcion = menuGames()
     
     fprintf ('\t 1. Display list of games\n');
     fprintf ('\t 2. Remove game\n');
-    fprintf ('\t 3. Display all games played by an ID');%
+    fprintf ('\t 3. Display all games played by an ID\n');%
     fprintf ('\t 0. Exit\n');
     
     fprintf ('\n\n');
-    opcion=input ('Enter selection: ');
+    option=input ('Enter selection: ');
     fprintf ('\n');
 end
 
-function opcion=menuPlayers()
+function option=menuPlayers()
     
     % to avoid overwriting previous results with menu
     keyPress=input('Press enter to see menu...'); 
@@ -214,13 +226,13 @@ function opcion=menuPlayers()
     fprintf ('\t 0. Back\n');   
     fprintf ('\n');
     % get user selection
-    opcion=input ('Enter selection: ');
+    option=input ('Enter selection: ');
     fprintf ('\n');
 end
 %-----------------------
 
 %game management functions
-function [games,nGames] = manageGames(games,nGames) % the main one that utilizes the other two
+function [games,nGames] = manageGames(games,nGames,players) % the main one that utilizes the other two
 counter=1;
     flag=0;
     while flag==0 %flag keeps manage games running until user enters 0
@@ -234,36 +246,76 @@ counter=1;
             nGames=nGames-1;
     
         elseif user_input2==2 && nGames==0
-            disp("Sorry there are currently no games loaded.");
+            fprintf("Sorry there are currently no games loaded.");
         
         elseif user_input2==1 && nGames~=0
-            displayGameList(games,nGames)
+            displayGamesList(games,nGames)
         
         elseif user_input2==1 && nGames==0
-            disp("Sorry there are currently no games loaded.");
-        elseif user_input2==3 && nGames~=0
-% curently not working
-            % Id=input("What is the ID?: ");
-            % for i=1:nGames
-            %     if games(1,i).playerId==Id
-            %         games_of_player(1,Id,counter)=games(i,nGames);
-            %         counter=counter+1;
-            %     end
-            % end
-
-            if counter<2
-                fprintf("There are not played games with this ID");
-            end
-            Id=0;
+            fprintf("Sorry there are currently no games loaded.");
+        elseif user_input2==3 && nGames~=0 %lists all games from player of id
+            Id=input("What is the ID?: ");
+            playerGames(Id,players,nGames,games)
 
         elseif user_input2==3 && nGames==0
-            disp("Sorry there are currently no games loaded.");
+            disp("Sorry, there are currently no games loaded.");
 
         elseif user_input2==0
             flag=1;
         end
     
     end
+
+end
+
+function playerGames(Id,players,nGames,games)%makes temporary variable with all games from one player and then displays that list of games
+
+  games_of_player=struct('nGuesses',0, ...
+      'secretCode',[0 0 0 0], ...
+      'playerId',zeros(1,players(1,Id).nGames), ...
+      'board', zeros(10,4), ...
+      'feedback',zeros(10,2), ...
+      'score',zeros(1,players(1,Id).nGames));
+
+
+    for z=1:1:(players(1,Id).nGames)
+       games_of_player(1,z)=struct('nGuesses',0, ...
+      'secretCode',[0 0 0 0], ...
+      'playerId',0, ...%
+      'board', zeros(10,4), ...
+      'feedback',zeros(10,2), ...
+      'score',0); %
+    end
+
+    validId=0;
+    switch Id
+        case {players(1,:).playerId}
+            counter=1;
+            for k=1:1:nGames
+                if games(1,k).playerId==players(1,Id).playerId
+                    games_of_player(1,counter)=games(1,k);
+                    counter=counter+1;
+                end
+            end
+
+            fprintf("Name and surname of player:%s %s \n\n",players(1,Id).name,players(1,Id).surname)
+
+            for i=1:1:(players(1,Id).nGames)
+                fprintf("----GAME NUMBER %i----\n",i)
+                %fprintf("The secrert code:%i
+                %\n",games_of_player(1,i).secretCode) figure out how to
+                %display secret code
+                fprintf("The score:%i \n",games_of_player(1,i).score)
+            end
+            validId=1;
+    end
+    
+    if validId==0
+    
+        fprintf("Sorry that is not a valid player Id. \n")
+
+    end
+
 
 end
 
@@ -278,7 +330,7 @@ function games = removeGame(games,game_remove_number)
 
 end
 
-function displayGameList(games,nGames) %might be janky requires further scrutinizing
+function displayGamesList(games,nGames) %might be janky requires further scrutinizing
 
     % displays secret code, number of guesses and score
     for i=1:1:nGames
@@ -328,7 +380,8 @@ function[players, nPlayers,sortedPlayers] = managePlayers (players,nPlayers,maxP
                     clc
                     fprintf("Sorry there are currently no players loaded.\n\n")
                 else
-                    sortedPlayers=listPlayersRanked(players,nPlayers);
+                    top_players=input("Input the number of top players you want to list: ");
+                    sortedPlayers=listPlayersRanked(players,nPlayers,top_players);
                 end
             end
     end
@@ -355,7 +408,7 @@ function listPlayers(players,nPlayer)
     end
 end
 
-function sortedPlayers=listPlayersRanked(players,nPlayers)%rank players outside or in different function to make code more readable
+function sortedPlayers=listPlayersRanked(players,nPlayers,top_players)%rank players outside or in different function to make code more readable
     
     players_rankings=zeros(1,nPlayers); %gives ranking of players in order of id, change so it takes variable nPlayers
     i=1;
@@ -377,7 +430,7 @@ function sortedPlayers=listPlayersRanked(players,nPlayers)%rank players outside 
     
 
     fprintf("The top three players are: \n")
-    for z=1:1:3
+    for z=1:1:top_players
         fprintf("Player #%i with %i points \n",sortedPlayers(z).playerId,sortedPlayers(z).score)
     end
 
@@ -555,5 +608,3 @@ function secretCode = generateSecretCode()%check if storing secret code as singl
     %if uncommented change secretCode(i)=bag(n) to secretCodeV(i)=bag(n)
 
 end
-
-
