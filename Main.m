@@ -130,10 +130,10 @@ while run==1
             fprintf("\nThank you for playing the game!")
             run=0;
             %these lines are for storing the data
-            fileName='games.mat';
-            save(fileName,'games'); 
-            fileName='players.mat';
-            save(fileName,'players');
+            fileName1='games.mat';
+            save(fileName1,'games'); 
+            fileName2='players.mat';
+            save(fileName2,'players');
     end
 
 end
