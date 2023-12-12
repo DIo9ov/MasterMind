@@ -7,22 +7,7 @@
 clc
 clear
 
-%concerns or bugs notices: (list all bugs when playtesting the game below)
-%-two variables one names Id other id
-%-delete secret code in play function when not testing
 
-%things to do: 
-%-
-
-%sprint 4 things:
-%-display list of games from specific player
-%-make sure when a game finishes it updates the players who's id was put in
-
-%optional:
-%-write out real code when player runs out of guesses
-%-add clc so that menu is kept clean without clearing neccesary outputs
-%-check that no colours are repeated in guess and if so do not count that
-%attempt as valid
 
 player_base=struct('playerId',0,'name',"name",'surname',"surname",'nGames',0,'score',0);
 
@@ -277,7 +262,7 @@ function playerGames(Id,players,nGames,games)%makes temporary variable with all 
       'feedback',zeros(10,2), ...
       'score',zeros(1,players(1,Id).nGames));
 
-
+% suspicious lines of code. If it works, dont touch it!
     for z=1:1:(players(1,Id).nGames)
        games_of_player(1,z)=struct('nGuesses',0, ...
       'secretCode',[0 0 0 0], ...
@@ -504,11 +489,17 @@ function game=play(game_base)
     game.secretCode = generateSecretCode();
 
     %game.Secretcode=secretCode; %Copy into structure
+    trouble_enter="sth";
 
     while i<=10 && comp==false
         for j=1:4
             fprintf("Position %i\n",j)
-            game.board(i,j)=input('Enter your board(numbers between 1 and 6):');
+            while(trouble_enter~="1" && trouble_enter~="2" && trouble_enter~="3" &&...
+            trouble_enter~="4" && trouble_enter~="5" && trouble_enter~="6") 
+            trouble_enter=input("Enter your board(numbers between 1 and 6):","s");
+            end
+            game.board(i,j)=str2num(trouble_enter);
+            trouble_enter="sth";
         end
         [white,black] = verifyCode(game.secretCode,game.board(i,:));
         game.feedback(i,1)=black;
@@ -545,7 +536,7 @@ function displayGame(game)
         fprintf("%i\t%i\t%i\t%i\t--\t%i\t%i\n",game.board(i,1),game.board(i,2) ...
             ,game.board(i,3),game.board(i,4),game.feedback(i,1),game.feedback(i,2))
     end
-    disp(game.secretCode)
+    % disp(game.secretCode) % Really important line for testing. Dont% touch!
     if win==1
         for i=turn:1:10
             fprintf("-\t-\t-\t-\t--\t-\t-\n")
