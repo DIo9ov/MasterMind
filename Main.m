@@ -4,6 +4,8 @@
 %Dimiter Ionov - 100506562
 %Raul Flores Garcia - 100521942
 
+
+% Alternitavely check on github: https://github.com/DIo9ov/MasterMind
 clc
 clear
 
@@ -188,7 +190,7 @@ function option = menuGames()
     fprintf ('\t 1. Display list of games\n');
     fprintf ('\t 2. Remove game\n');
     fprintf ('\t 3. Display all games played by an ID\n');%
-    fprintf ('\t 0. Exit\n');
+    fprintf ('\t 0. Back\n');
     
     fprintf ('\n\n');
     option=input ('Enter selection: ');
@@ -217,7 +219,7 @@ end
 %-----------------------
 
 %game management functions
-function [games,nGames] = manageGames(games,nGames,players) % the main one that utilizes the other two
+function [games,nGames,players] = manageGames(games,nGames,players) % the main one that utilizes the other two
 counter=1;
     flag=0;
     while flag==0 %flag keeps manage games running until user enters 0
@@ -227,7 +229,7 @@ counter=1;
         if user_input2==2 && nGames~=0
             menu(3,nGames)
             game_remove_number=input("");
-            games=removeGame(games,game_remove_number); 
+            [games,players]=removeGame(games,game_remove_number,players); 
             nGames=nGames-1;
     
         elseif user_input2==2 && nGames==0
@@ -262,7 +264,6 @@ function playerGames(Id,players,nGames,games)%makes temporary variable with all 
       'feedback',zeros(10,2), ...
       'score',zeros(1,players(1,Id).nGames));
 
-% suspicious lines of code. If it works, dont touch it!
     for z=1:1:(players(1,Id).nGames)
        games_of_player(1,z)=struct('nGuesses',0, ...
       'secretCode',[0 0 0 0], ...
@@ -289,7 +290,7 @@ function playerGames(Id,players,nGames,games)%makes temporary variable with all 
                 fprintf("----GAME NUMBER %i----\n",i)
                 %fprintf("The secrert code:%i
                 %\n",games_of_player(1,i).secretCode) figure out how to
-                %display secret code
+                %display secret code(optional)
                 fprintf("The score:%i \n",games_of_player(1,i).score)
             end
             validId=1;
@@ -304,11 +305,20 @@ function playerGames(Id,players,nGames,games)%makes temporary variable with all 
 
 end
 
-function games = removeGame(games,game_remove_number)
+function [games,players] = removeGame(games,game_remove_number,players)
+
+    game_id=games(game_remove_number).playerId;
+    game_points=games(game_remove_number).score;
 
     for i=game_remove_number:1:(249)
         games(i)=games(i+1);
     end
+
+    new_number_of_games=players(game_id).nGames -1;
+    players(game_id).nGames=new_number_of_games;
+    
+    new_points_of_player=players(game_id).score-game_points;
+    players(game_id).score=new_points_of_player;
 
     games(250) = struct('playerId', 0, 'nGuesses',0, 'secretCode',[0 0 0 0], 'board', zeros(10,4), 'feedback',zeros(10,2), ...
     'score',0);
@@ -365,7 +375,15 @@ function[players, nPlayers,sortedPlayers] = managePlayers (players,nPlayers,maxP
                     clc
                     fprintf("Sorry there are currently no players loaded.\n\n")
                 else
-                    top_players=input("Input the number of top players you want to list: ");
+                    flag=0;
+                    while flag==0
+                        top_players=input("Input the number of top players you want to list: ");
+                        if top_players<=nPlayers
+                            flag=1;
+                        else
+                            fprintf("Sorry there are only %i players loaded \n",nPlayers)
+                        end
+                    end
                     sortedPlayers=listPlayersRanked(players,nPlayers,top_players);
                 end
             end
